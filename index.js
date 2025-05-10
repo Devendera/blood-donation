@@ -4,7 +4,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const admin = require("./firebase");
-const db = admin.firestore();
 
 const app = express();
 app.use(cors());
@@ -12,7 +11,8 @@ app.use(bodyParser.json());
 
 // Register User
 app.post("/register", async (req, res) => {
-  const { email, password, fullName, bloodType, agreedToTerms } = req.body;
+  const { email, password, fullName, bloodType, agreeToTerms } = req.body;
+
   // Input validation
   if (!email || !password || !fullName || !bloodType) {
     return res.status(400).json({
@@ -22,11 +22,22 @@ app.post("/register", async (req, res) => {
     });
   }
 
-  if (!agreedToTerms) {
+  // Validate agreeToTerms - FIXED: Changed from agreedToTerms to agreeToTerms
+  if (!agreeToTerms) {
     return res.status(400).json({
       status: 400,
       success: false,
       message: "You must agree to the terms and conditions."
+    });
+  }
+
+  // Validate blood type
+  const validBloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+  if (!validBloodTypes.includes(bloodType)) {
+    return res.status(400).json({
+      status: 400,
+      success: false,
+      message: "Invalid blood type"
     });
   }
 
@@ -36,25 +47,25 @@ app.post("/register", async (req, res) => {
       password,
       displayName: fullName
     });
-    // Store additional user data in Firestore
+
+    // Store extra data in Firestore
+    const db = admin.firestore();
     await db.collection("users").doc(userRecord.uid).set({
-      email,
       fullName,
       bloodType,
-      agreedToTerms,
-      createdAt: new Date().toISOString()
+      email,
+      createdAt: new Date(),
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       status: 201,
       success: true,
-      message: "User registered successfully.",
-      uid: userRecord.uid
+      message: "User registered successfully",
+      uid: userRecord.uid 
     });
-
   } catch (error) {
-    return res.status(500).json({
-      status: 500,
+    res.status(400).json({
+      status: 400,
       success: false,
       message: error.message
     });
@@ -66,15 +77,15 @@ const axios = require("axios");
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-   // Input validation
-   if (!email || !password) {
+  
+  if (!email || !password) {
     return res.status(400).json({
       status: 400,
       success: false,
-      message: "Email and password are required."
+      message: "Email and password are required"
     });
   }
-  
+
   try {
     const apiKey = process.env.FIREBASE_API_KEY;
     const response = await axios.post(
@@ -85,20 +96,30 @@ app.post("/login", async (req, res) => {
         returnSecureToken: true
       }
     );
-    return res.status(200).json({
+    
+    res.json({
       status: 200,
       success: true,
-      message: "Login successful.",
+      message: "Login successful",
       token: response.data.idToken
     });
   } catch (error) {
-      console.error("Firebase login error:", error.response?.data || error.message);
-      return res.status(401).json({
+    res.status(401).json({
       status: 401,
       success: false,
-      message: "Invalid email or password."
+      message: "Invalid email or password",
+      error: error.message
     });
   }
+});
+
+// General error handler for undefined routes
+app.use((req, res) => {
+  res.status(404).json({
+    status: 404,
+    success: false,
+    message: "Endpoint not found"
+  });
 });
 
 app.listen(3000, () => {
