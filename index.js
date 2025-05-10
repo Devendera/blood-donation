@@ -4,9 +4,11 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const admin = require("./firebase");
+const adminRoutes = require('./backend/routes/adminRoutes');
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 app.use(bodyParser.json());
 
 // Register User
@@ -113,15 +115,8 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// General error handler for undefined routes
-app.use((req, res) => {
-  res.status(404).json({
-    status: 404,
-    success: false,
-    message: "Endpoint not found"
-  });
-});
 
-app.listen(3000, () => {
-  console.log("Server running on http://localhost:3000");
-});
+
+app.use('/api/admin', adminRoutes);
+
+app.listen(3000, () => console.log('Server running on port 3000'));
