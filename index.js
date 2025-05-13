@@ -14,8 +14,9 @@ app.use(bodyParser.json());
 
 // Register User
 app.post("/register", async (req, res) => {
-  const { email, password, fullName, bloodType, agreeToTerms } = req.body;
-
+  let { email, password, fullName, bloodType, agreeToTerms } = req.body;
+  // Trim the email to remove leading/trailing spaces
+  email = email.trim();
   // Input validation
   if (!email || !password || !fullName || !bloodType) {
     return res.status(400).json({
