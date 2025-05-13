@@ -119,7 +119,6 @@ app.post("/login", async (req, res) => {
 
 
 app.use('/api/admin', adminRoutes);
-//app.use('/api/donation', donationRoutes);
 app.use('/user/donation', donationRoutes); // Protected by token
 
 
