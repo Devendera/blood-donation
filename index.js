@@ -117,47 +117,95 @@ const axios = require("axios");
 
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
-  
+
   if (!email || !password) {
     return res.status(400).json({
       status: 400,
       success: false,
-      message: "Email and password are required"
+      message: "Email and password are required",
     });
   }
 
   try {
     const apiKey = process.env.FIREBASE_API_KEY;
+
+    // Sign in using Firebase Auth REST API
     const response = await axios.post(
       `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`,
       {
         email,
         password,
-        returnSecureToken: true
+        returnSecureToken: true,
       }
     );
-    
-    res.json({
+
+    const idToken = response.data.idToken;
+
+    // Verify and decode token to get uid
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const uid = decodedToken.uid;
+
+    // Fetch user data from Firestore
+    const db = admin.firestore();
+    const userDoc = await db.collection("users").doc(uid).get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({
+        status: 404,
+        success: false,
+        message: "User data not found in Firestore",
+      });
+    }
+
+    const userData = userDoc.data();
+    // Step 4: Convert Firestore timestamp to human-readable format
+    let readableCreatedAt = null;
+    const createdAt = userData.createdAt;
+
+    if (createdAt && createdAt._seconds) {
+      const date = new Date(createdAt._seconds * 1000);
+      const options = {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      };
+      readableCreatedAt = date.toLocaleString("en-US", options);
+    }
+
+    // Send response with token + user details
+    res.status(200).json({
       status: 200,
       success: true,
       message: "Login successful",
-      token: response.data.idToken,
-      //  admin: response
+      token: idToken,
+      user: {
+        uid,
+        fullName: userData.fullName,
+        bloodType: userData.bloodType,
+        email: userData.email,
+        createdAt: readableCreatedAt
+      }
     });
+
   } catch (error) {
+    console.error("Login error:", error.message);
     res.status(401).json({
       status: 401,
       success: false,
       message: "Invalid email or password",
-      error: error.message
+      error: error.message,
     });
   }
 });
 
 
 
+
 app.use('/api/admin', adminRoutes);
-app.use('/api', dashboardRoutes);
+app.use('/api', dashboardRoutes); // Request blood route
 app.use('/user/donation', donationRoutes); // Protected by token
 
 
