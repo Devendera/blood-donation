@@ -5,8 +5,8 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const admin = require("./firebase");
 const adminRoutes = require('./backend/routes/adminRoutes');
+const dashboardRoutes = require('./backend/routes/dashboardRoutes');
 const donationRoutes = require('./backend/routes/donationRoutes');
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -75,6 +75,43 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.get("/donors", async (req, res) => {
+  try {
+    const db = admin.firestore();
+    const usersRef = db.collection("users");
+    const snapshot = await usersRef.get();
+
+    if (snapshot.empty) {
+      return res.status(200).json({
+        status: 200,
+        success: true,
+        message: "No donors found",
+        donors: [],
+      });
+    }
+
+    const donors = snapshot.docs.map(doc => ({
+      uid: doc.id,
+      ...doc.data()
+    }));
+
+    res.status(200).json({
+      status: 200,
+      success: true,
+         message: "Donors fetched successfully",
+      total: donors.length,
+      donors
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 500,
+      success: false,
+      message: "Failed to fetch donor data",
+      error: error.message
+    });
+  }
+});
+
 // Login - verify email/password using Firebase Auth REST API
 const axios = require("axios");
 
@@ -104,7 +141,8 @@ app.post("/login", async (req, res) => {
       status: 200,
       success: true,
       message: "Login successful",
-      token: response.data.idToken
+      token: response.data.idToken,
+      //  admin: response
     });
   } catch (error) {
     res.status(401).json({
@@ -119,7 +157,8 @@ app.post("/login", async (req, res) => {
 
 
 app.use('/api/admin', adminRoutes);
-//app.use('/api/donation', donationRoutes);
+app.use('/api', dashboardRoutes);
 app.use('/user/donation', donationRoutes); // Protected by token
+
 
 app.listen(3000, () => console.log('Server running on port 3000'));
