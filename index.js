@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const admin = require("./firebase");
 const adminRoutes = require('./backend/routes/adminRoutes');
+const donationRoutes = require('./backend/routes/donationRoutes');
 
 const app = express();
 app.use(cors());
@@ -118,5 +119,7 @@ app.post("/login", async (req, res) => {
 
 
 app.use('/api/admin', adminRoutes);
+//app.use('/api/donation', donationRoutes);
+app.use('/user/donation', donationRoutes); // Protected by token
 
 app.listen(3000, () => console.log('Server running on port 3000'));
