@@ -10,7 +10,8 @@ exports.registerDonation = async (req, res) => {
       weight,
       lastDonationDate,
       location,
-      isHealthy
+      isHealthy,
+      phoneNumber
     } = req.body;
 
     // Validation
@@ -55,6 +56,7 @@ exports.registerDonation = async (req, res) => {
       lastDonationDate,
       location,
       isHealthy,
+      phoneNumber,
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     });
 
@@ -72,3 +74,78 @@ exports.registerDonation = async (req, res) => {
     });
   }
 };
+
+// GET all blood donations
+exports.getAllDonations = async (req, res) => {
+  try {
+    const snapshot = await db.collection('bloodDonations').orderBy('createdAt', 'desc').get();
+
+    const donations = snapshot.docs.map(doc => {
+      const data = doc.data();
+
+      // Convert Firestore Timestamp to JS Date
+      const createdAtFormatted = data.createdAt?.seconds
+        ? new Date(data.createdAt.seconds * 1000).toLocaleString('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+          })
+        : null;
+
+      // Remove raw createdAt and return formatted version only
+      const { createdAt, ...restData } = data;
+
+      return {
+        id: doc.id,
+        ...restData,
+        createdAtFormatted
+      };
+    });
+
+    return res.status(200).json({
+      status: 200,
+      success: true,
+      message: "All blood donations fetched successfully",
+      data: donations
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// GET donor phone number by ID
+exports.getDonorPhone = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const docRef = db.collection('bloodDonations').doc(id);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return res.status(404).json({
+        status: 404,
+        success: false,
+        message: "Donor not found"
+      });
+    }
+
+    const data = doc.data();
+
+    return res.status(200).json({
+      status: 200,
+      success: true,
+      phoneNumber: data.phoneNumber || null
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 500,
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+

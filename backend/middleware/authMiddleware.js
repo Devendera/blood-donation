@@ -16,7 +16,7 @@ const verifyToken = async (req, res, next) => {
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
     req.user = decodedToken;
-    next(); // Proceed to next middleware/route handler
+    next();
   } catch (error) {
     return res.status(401).json({
       status: 401,
