@@ -1,0 +1,61 @@
+.hero-banner {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  background-size: cover;
+  background-position: center;
+}
+
+.overlay {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.45); /* dark overlay */
+  display: flex;
+  align-items: center;
+  /* justify-content: center; */
+  /* padding: 20px; */
+}
+
+.hero-content {
+  color: white;
+  text-align: center;
+  max-width: 800px;
+  margin-left: 24px;
+}
+
+.tagline {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.main-heading {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.hero-buttons {
+  margin-top: 25px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.donate-btn {
+  background-color: #e32222;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.call-box button{
+  background-color: #333;
+  color: white;
+  padding: 12px 24px;
+  font-weight: bold;
+  font-size: 14px;
+}
