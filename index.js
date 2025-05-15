@@ -7,6 +7,7 @@ const admin = require("./firebase");
 const adminRoutes = require('./backend/routes/adminRoutes');
 const dashboardRoutes = require('./backend/routes/dashboardRoutes');
 const donationRoutes = require('./backend/routes/donationRoutes');
+
 const app = express();
 app.use(cors());
 app.use(express.json());

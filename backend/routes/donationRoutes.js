@@ -1,14 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const donationController = require('../controllers/donationController');
-const verifyToken = require('../middleware/authMiddleware'); // Import middleware
+const donationEventController = require('../controllers/donationEventController');
+const verifyToken = require('../middleware/authMiddleware');
 
-router.post('/register', verifyToken, donationController.registerDonation);
-// Get all donations (protected)
-router.get('/all', verifyToken, donationController.getAllDonations);
-
-// Get donor's phone number by donation ID
-router.get('/phone/:id', verifyToken, donationController.getDonorPhone);
-
+router.post('/events', verifyToken, donationEventController.createDonationEvent);
+router.get('/events', verifyToken, donationEventController.getAllDonationEvents);
+router.put('/events/:id', verifyToken, donationEventController.updateDonationEvent);
+router.delete('/events/:id', verifyToken, donationEventController.deleteDonationEvent);
 
 module.exports = router;
