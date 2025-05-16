@@ -33,7 +33,7 @@ const FieldValue = admin.firestore.FieldValue;
 // };
 exports.createDonationEvent = async (req, res) => {
   try {
-    const { eventName, eventDate, location, description } = req.body;
+    const { eventName, eventDate, location, organizer, description } = req.body;
 
     if (!eventName || !eventDate || !location) {
       return res.status(400).json({
@@ -48,7 +48,8 @@ exports.createDonationEvent = async (req, res) => {
       eventName,
       eventDate,
       location,
-      description: description ?? "",  // 👈 prevent undefined
+      organizer,
+      description: description ?? "",  // 
       createdAt: new Date()
     });
 
