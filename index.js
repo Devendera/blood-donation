@@ -211,4 +211,5 @@ app.use('/api', dashboardRoutes); // Request blood route
 app.use('/user/donation', donationRoutes); // Protected by token
 
 
-app.listen(5000, () => console.log('Server running on port 5000'));
+app.listen(process.env.PORT || 5000, () => console.log('Server running...'));
+//app.listen(5000, () => console.log('Server running on port 5000'));

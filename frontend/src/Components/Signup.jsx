@@ -50,7 +50,7 @@ function SignupForm() {
     setError("");
 
      try {
-      const response = await axios.post("http://localhost:5000/register", {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/register`, {
      fullName: inputs.name,
         email: inputs.email,
         password: inputs.password,
